@@ -1,0 +1,34 @@
+sequenceDiagram
+    autonumber
+    title DS2 – Selecionar plano e registrar preferências (passos 5–9)
+    actor A as Assinante
+    participant T as :TelaAssinatura
+    participant C as :AssinarPlanoController
+    participant RP as :RepositorioPlanos
+    participant P as p:PlanoAssinatura
+    participant AS as a:Assinante
+    participant ASN as as:Assinatura
+    participant PD as :Pedido
+    participant RA as :RepositorioAssinantes
+
+    T->>C: listarPlanos()
+    C->>RP: listarDisponiveis()
+    RP-->>C: List<PlanoAssinatura>
+    C-->>T: planos
+    T-->>A: exibe planos (qtd. refeições, periodicidade, valor)
+
+    A->>T: seleciona plano e confirma
+    T->>C: selecionarPlano(idPlano)
+    C->>RP: buscarPorId(idPlano)
+    RP-->>C: p
+    C->>ASN: «create» new Assinatura(a, p)
+    ASN->>AS: isCelularVerificado()
+    ASN->>PD: «create» new Pedido(p)
+    Note over ASN: status = EM_ELABORACAO
+
+    T-->>A: solicita preferências alimentares
+    A->>T: informa preferências (ex.: Vegetariana, Sem lactose)
+    T->>C: registrarPreferencias(prefs)
+    C->>AS: registrarPreferencias(prefs)
+    C->>RA: salvar(a)
+    T-->>A: "Preferências registradas"

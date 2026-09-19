@@ -1,0 +1,27 @@
+sequenceDiagram
+    autonumber
+    title DS4 – Informar endereço de entrega (passos 20–23)
+    actor A as Assinante
+    participant T as :TelaAssinatura
+    participant E as e:Endereco
+    participant C as :AssinarPlanoController
+    participant AS as a:Assinante
+    participant RA as :RepositorioAssinantes
+    participant ASN as as:Assinatura
+    participant PD as :Pedido
+    participant RS as :RepositorioAssinaturas
+
+    T-->>A: solicita endereço de entrega
+    A->>T: informa logradouro, nº, bairro, cidade, UF, CEP
+    T->>E: «create» new Endereco(...)
+    Note right of E: valida campos obrigatórios, UF e CEP
+    A->>T: confirma endereço
+    T->>C: informarEndereco(e)
+    C->>AS: definirEnderecoEntrega(e)
+    C->>RA: salvar(a)
+    C->>ASN: aguardarPagamento()
+    ASN->>PD: possuiPratoPrincipal()
+    ASN->>AS: getEnderecoEntrega()
+    Note over ASN: status = AGUARDANDO_PAGAMENTO
+    C->>RS: salvar(as)
+    T-->>A: "Endereço armazenado"

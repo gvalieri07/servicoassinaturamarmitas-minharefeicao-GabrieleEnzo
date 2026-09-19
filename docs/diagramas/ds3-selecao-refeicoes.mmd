@@ -1,0 +1,49 @@
+sequenceDiagram
+    autonumber
+    title DS3 – Selecionar pratos, acompanhamentos e sobremesas (passos 10–19) + FA2
+    actor A as Assinante
+    participant T as :TelaAssinatura
+    participant C as :AssinarPlanoController
+    participant CD as :Cardapio
+    participant IC as i:ItemCardapio
+    participant ASN as as:Assinatura
+    participant PD as :Pedido
+    participant P as p:PlanoAssinatura
+    participant IP as :ItemPedido
+
+    Note over A,IP: O bloco abaixo se repete para cada categoria: PRATO_PRINCIPAL (10–12), ACOMPANHAMENTO (13–15), SOBREMESA (16–18)
+
+    T->>C: listarItens(categoria)
+    C->>CD: listarDisponiveis(categoria, a.getPreferencias())
+    loop para cada item do cardápio
+        CD->>IC: getCategoria(), isDisponivel(), atende(prefs)
+    end
+    CD-->>C: List<ItemCardapio>
+    C-->>T: itens compatíveis
+    T-->>A: exibe itens da categoria
+
+    loop enquanto o assinante seleciona itens
+        A->>T: código do item + quantidade
+        T->>C: adicionarAoPedido(codigo, qtd)
+        C->>CD: buscarPorCodigo(codigo)
+        CD-->>C: i
+        C->>ASN: adicionarItemAoPedido(i, qtd)
+        ASN->>PD: adicionarItem(i, qtd)
+        PD->>P: getLimitePor(categoria)
+        P-->>PD: limite
+        PD->>PD: getQuantidadeSelecionada(categoria)
+        alt dentro do limite
+            PD->>IP: «create» new ItemPedido(i, qtd)
+            T-->>A: "Adicionado ao pedido"
+        else FA2 – quantidade superior à permitida
+            PD--xASN: LimiteRefeicoesExcedidoException
+            ASN--xC: LimiteRefeicoesExcedidoException
+            C--xT: LimiteRefeicoesExcedidoException
+            T-->>A: informa limite do plano e pede ajuste
+            Note over A,T: Após a correção, retorna ao ponto da seleção
+        end
+    end
+
+    T->>C: obterPedido()
+    C-->>T: pedido (somente leitura)
+    T-->>A: exibe composição completa do pedido (passo 19)

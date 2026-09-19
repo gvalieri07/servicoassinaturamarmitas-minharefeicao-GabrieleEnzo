@@ -1,0 +1,50 @@
+sequenceDiagram
+    autonumber
+    title DS1 – Identificar assinante (passos 1–4) + FA1
+    actor A as Assinante
+    participant T as :TelaAssinatura
+    participant C as :AssinarPlanoController
+    participant RA as :RepositorioAssinantes
+    participant AS as a:Assinante
+    participant CC as cod:CodigoConfirmacao
+    participant SMS as :ServicoSMS
+
+    A->>T: informa celular
+    T->>C: informarCelular(celular)
+    C->>AS: normalizarCelular(celular)
+    C->>RA: buscarPorCelular(celular)
+    RA-->>C: Optional<Assinante>
+    opt assinante ainda não cadastrado
+        C->>AS: «create» new Assinante(celular)
+    end
+    C->>CC: «create» gerar(random)
+    C->>CC: gerarMensagemSMS()
+    CC-->>C: mensagem
+    C->>SMS: enviar(celular, mensagem)
+    T-->>A: "Código enviado por SMS"
+
+    loop até validar (máx. 3 tentativas)
+        A->>T: informa código
+        T->>C: validarCodigo(codigo)
+        C->>CC: validar(codigo)
+        alt código válido
+            CC-->>C: true
+            C->>AS: confirmarCelular()
+            C->>RA: salvar(a)
+            C-->>T: true
+            T-->>A: "Código validado" (segue para o passo 5)
+        else FA1 – código inválido (1ª ou 2ª tentativa)
+            CC-->>C: false
+            C-->>T: false
+            T->>C: getTentativasRestantes()
+            T-->>A: "Código inválido, tente novamente"
+        else FA1.5 – 3ª tentativa inválida
+            CC--xC: TentativasEsgotadasException
+            C--xT: TentativasEsgotadasException
+            T-->>A: "Validação encerrada, solicite novo código"
+            A->>T: solicita novo código
+            T->>C: solicitarNovoCodigo()
+            C->>CC: «create» gerar(random)
+            C->>SMS: enviar(celular, mensagem)
+        end
+    end

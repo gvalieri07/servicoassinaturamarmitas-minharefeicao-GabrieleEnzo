@@ -1,0 +1,54 @@
+sequenceDiagram
+    autonumber
+    title DS5 – Efetuar pagamento e confirmar assinatura (passos 24–31) + FA3
+    actor A as Assinante
+    participant T as :TelaAssinatura
+    participant C as :AssinarPlanoController
+    participant ASN as as:Assinatura
+    participant CR as c:CartaoCredito
+    participant OP as :OperadoraCartao
+    participant PG as pg:Pagamento
+    participant PD as :Pedido
+    participant GP as :GeradorProtocolo
+    participant CF as :ConfirmacaoAssinatura
+    actor OPR as Operadora de Cartão
+
+    T->>C: obterValorTotal()
+    C->>ASN: calcularValorTotal()
+    ASN-->>C: valor
+    T-->>A: exibe valor total e solicita dados do cartão
+
+    loop até aprovar ou o assinante desistir
+        A->>T: número, titular, validade, CVV
+        T->>C: pagar(numero, titular, validade, cvv)
+        C->>CR: «create» new CartaoCredito(...)
+        C->>ASN: calcularValorTotal()
+        C->>OP: autorizar(c, valor)
+        OP->>OPR: solicita autorização
+        OPR-->>OP: resposta
+        OP-->>C: RespostaAutorizacao
+        C->>PG: «create» new Pagamento(valor, c, aprovado, codAut)
+        C->>ASN: registrarPagamento(pg)
+        alt pagamento aprovado
+            Note over ASN: status = ATIVA
+            ASN->>PD: aprovar()
+            Note over PD: status = APROVADO
+            C->>GP: gerar()
+            GP-->>C: protocolo
+            C->>ASN: atribuirProtocolo(protocolo)
+            C->>CF: «create» de(as)
+            C-->>T: ConfirmacaoAssinatura
+            T-->>A: plano, refeições, periodicidade, endereço,<br/>previsão da 1ª entrega e protocolo
+        else FA3 – pagamento não autorizado
+            Note over ASN: permanece AGUARDANDO_PAGAMENTO
+            C--xT: PagamentoNaoAutorizadoException
+            T-->>A: "Pagamento não aprovado. Tentar novamente?"
+            opt FA3.6 – assinante não deseja tentar novamente
+                A->>T: não
+                T->>C: desistirDaAssinatura()
+                C->>ASN: encerrarSemAtivacao()
+                ASN->>PD: cancelar()
+                Note over ASN: status = ENCERRADA_SEM_ATIVACAO
+            end
+        end
+    end

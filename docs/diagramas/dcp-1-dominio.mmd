@@ -1,0 +1,145 @@
+classDiagram
+direction TB
+class Assinante {
+  -celular: String
+  -celularVerificado: boolean
+  -preferencias: Set~PreferenciaAlimentar~
+  +confirmarCelular() void
+  +registrarPreferencias(prefs: Set~PreferenciaAlimentar~) void
+  +definirEnderecoEntrega(e: Endereco) void
+}
+class CodigoConfirmacao {
+  +MAXIMO_TENTATIVAS: int = 3$
+  -valor: String
+  -tentativasInvalidas: int
+  -validado: boolean
+  +gerar(random: Random)$ CodigoConfirmacao
+  +validar(informado: String) boolean
+  +isBloqueado() boolean
+  +getTentativasRestantes() int
+  +gerarMensagemSMS() String
+}
+class Endereco {
+  <<value object>>
+  -logradouro: String
+  -numero: String
+  -complemento: String
+  -bairro: String
+  -cidade: String
+  -uf: String
+  -cep: String
+}
+class PlanoAssinatura {
+  -id: int
+  -nome: String
+  -quantidadeRefeicoes: int
+  -periodicidade: Periodicidade
+  -valor: BigDecimal
+  +getLimitePor(c: CategoriaItem) int
+}
+class Assinatura {
+  -status: StatusAssinatura
+  -protocolo: String
+  -previsaoPrimeiraEntrega: LocalDate
+  +calcularValorTotal() BigDecimal
+  +adicionarItemAoPedido(item: ItemCardapio, qtd: int) void
+  +aguardarPagamento() void
+  +registrarPagamento(p: Pagamento) void
+  +atribuirProtocolo(protocolo: String) void
+  +encerrarSemAtivacao() void
+}
+class Pedido {
+  -status: StatusPedido
+  +adicionarItem(item: ItemCardapio, qtd: int) void
+  +getQuantidadeSelecionada(c: CategoriaItem) int
+  +getQuantidadeDisponivel(c: CategoriaItem) int
+  +possuiPratoPrincipal() boolean
+  ~aprovar() void
+  ~cancelar() void
+}
+class ItemPedido {
+  -quantidade: int
+  ~acrescentar(qtd: int) void
+}
+class Cardapio {
+  +listarDisponiveis(c: CategoriaItem, prefs: Set~PreferenciaAlimentar~) List~ItemCardapio~
+  +buscarPorCodigo(codigo: String) Optional~ItemCardapio~
+}
+class ItemCardapio {
+  <<abstract>>
+  -codigo: String
+  -nome: String
+  -caracteristicas: Set~PreferenciaAlimentar~
+  -disponivel: boolean
+  +getCategoria()* CategoriaItem
+  +atende(prefs: Set~PreferenciaAlimentar~) boolean
+}
+class PratoPrincipal {
+  -pesoGramas: int
+}
+class Acompanhamento
+class Sobremesa
+class Pagamento {
+  -valor: BigDecimal
+  -dataHora: LocalDateTime
+  -cartaoMascarado: String
+  -status: StatusPagamento
+  -codigoAutorizacao: String
+  +isAprovado() boolean
+}
+class CartaoCredito {
+  -numero: String
+  -nomeTitular: String
+  -validade: YearMonth
+  -cvv: String
+  +getNumeroMascarado() String
+}
+class Periodicidade {
+  <<enumeration>>
+  SEMANAL
+  QUINZENAL
+  MENSAL
+}
+class PreferenciaAlimentar {
+  <<enumeration>>
+  TRADICIONAL
+  VEGETARIANA
+  SEM_LACTOSE
+}
+class CategoriaItem {
+  <<enumeration>>
+  PRATO_PRINCIPAL
+  ACOMPANHAMENTO
+  SOBREMESA
+}
+class StatusAssinatura {
+  <<enumeration>>
+  EM_ELABORACAO
+  AGUARDANDO_PAGAMENTO
+  ATIVA
+  ENCERRADA_SEM_ATIVACAO
+}
+class StatusPedido {
+  <<enumeration>>
+  EM_ELABORACAO
+  APROVADO
+  CANCELADO
+}
+Assinatura "0..*" --> "1" Assinante : pertence a
+Assinatura "0..*" --> "1" PlanoAssinatura : contrata
+Assinatura "1" *-- "1" Pedido : compõe
+Assinatura "1" *-- "0..*" Pagamento : registra
+Assinante --> "0..1" Endereco : enderecoEntrega
+Pedido "0..*" --> "1" PlanoAssinatura : limitado por
+Pedido "1" *-- "0..*" ItemPedido : contém
+ItemPedido "0..*" --> "1" ItemCardapio : refere-se a
+Cardapio "1" *-- "0..*" ItemCardapio : oferece
+ItemCardapio <|-- PratoPrincipal
+ItemCardapio <|-- Acompanhamento
+ItemCardapio <|-- Sobremesa
+PlanoAssinatura --> Periodicidade
+Assinante --> PreferenciaAlimentar
+ItemCardapio --> PreferenciaAlimentar
+Assinatura --> StatusAssinatura
+Pedido --> StatusPedido
+Pagamento ..> CartaoCredito : mascara

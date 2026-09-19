@@ -1,0 +1,117 @@
+classDiagram
+direction LR
+class TelaAssinatura {
+  -controller: AssinarPlanoController
+  -in: Scanner
+  +executar() void
+  -telaCelular() void
+  -telaCodigo() void
+  -telaPlanos() void
+  -telaPreferencias() void
+  -telaSelecao(categoria: CategoriaItem, obrigatorio: boolean) void
+  -telaResumoPedido() void
+  -telaEndereco() void
+  -telaPagamento() void
+}
+class AssinarPlanoController {
+  -assinante: Assinante
+  -codigo: CodigoConfirmacao
+  -assinatura: Assinatura
+  +informarCelular(celular: String) void
+  +solicitarNovoCodigo() void
+  +validarCodigo(codigo: String) boolean
+  +getTentativasRestantes() int
+  +listarPlanos() List~PlanoAssinatura~
+  +selecionarPlano(idPlano: int) void
+  +registrarPreferencias(prefs: Set~PreferenciaAlimentar~) void
+  +listarItens(categoria: CategoriaItem) List~ItemCardapio~
+  +adicionarAoPedido(codigoItem: String, qtd: int) void
+  +getQuantidadeDisponivel(categoria: CategoriaItem) int
+  +obterPedido() Pedido
+  +informarEndereco(endereco: Endereco) void
+  +obterValorTotal() BigDecimal
+  +pagar(numero: String, titular: String, validade: String, cvv: String) ConfirmacaoAssinatura
+  +desistirDaAssinatura() void
+  +getStatusAssinatura() StatusAssinatura
+}
+class ConfirmacaoAssinatura {
+  <<DTO>>
+  -protocolo: String
+  -plano: String
+  -periodicidade: String
+  -refeicoes: List~String~
+  -enderecoEntrega: String
+  -previsaoPrimeiraEntrega: LocalDate
+  -valorTotal: BigDecimal
+  ~de(a: Assinatura)$ ConfirmacaoAssinatura
+}
+class ServicoSMS {
+  <<interface>>
+  +enviar(celular: String, mensagem: String) void
+}
+class ServicoSMSSimulado
+class OperadoraCartao {
+  <<interface>>
+  +autorizar(cartao: CartaoCredito, valor: BigDecimal) RespostaAutorizacao
+}
+class OperadoraCartaoSimulada
+class RespostaAutorizacao {
+  -aprovado: boolean
+  -codigoAutorizacao: String
+  -mensagem: String
+}
+class GeradorProtocolo {
+  +gerar() String
+}
+class RepositorioPlanos {
+  +listarDisponiveis() List~PlanoAssinatura~
+  +buscarPorId(id: int) Optional~PlanoAssinatura~
+}
+class RepositorioAssinantes {
+  +salvar(a: Assinante) void
+  +buscarPorCelular(celular: String) Optional~Assinante~
+}
+class RepositorioAssinaturas {
+  +salvar(a: Assinatura) void
+}
+class Assinante {
+  <<domínio>>
+}
+class CodigoConfirmacao {
+  <<domínio>>
+}
+class Assinatura {
+  <<domínio>>
+}
+class Cardapio {
+  <<domínio>>
+}
+class PlanoAssinatura {
+  <<domínio>>
+}
+class CartaoCredito {
+  <<domínio>>
+}
+class Pagamento {
+  <<domínio>>
+}
+TelaAssinatura --> "1" AssinarPlanoController : usa
+AssinarPlanoController --> "1" ServicoSMS
+AssinarPlanoController --> "1" OperadoraCartao
+AssinarPlanoController --> "1" RepositorioPlanos
+AssinarPlanoController --> "1" RepositorioAssinantes
+AssinarPlanoController --> "1" RepositorioAssinaturas
+AssinarPlanoController --> "1" Cardapio
+AssinarPlanoController --> "1" GeradorProtocolo
+AssinarPlanoController --> "0..1" Assinante : sessão
+AssinarPlanoController --> "0..1" CodigoConfirmacao : sessão
+AssinarPlanoController --> "0..1" Assinatura : sessão
+AssinarPlanoController ..> ConfirmacaoAssinatura : «create»
+AssinarPlanoController ..> CartaoCredito : «create»
+AssinarPlanoController ..> Pagamento : «create»
+ServicoSMSSimulado ..|> ServicoSMS
+OperadoraCartaoSimulada ..|> OperadoraCartao
+OperadoraCartao ..> RespostaAutorizacao
+RepositorioPlanos o-- "0..*" PlanoAssinatura
+RepositorioAssinantes o-- "0..*" Assinante
+RepositorioAssinaturas o-- "0..*" Assinatura
