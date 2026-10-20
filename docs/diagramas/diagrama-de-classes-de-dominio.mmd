@@ -1,0 +1,92 @@
+classDiagram
+direction TB
+
+class Assinante {
+  -nome
+  -celular
+  -celularVerificado
+}
+class CodigoConfirmacao {
+  -valor
+  -dataHoraGeracao
+  -tentativasInvalidas
+  -validado
+}
+class PreferenciaAlimentar {
+  -nome
+  -descricao
+}
+class Endereco {
+  -logradouro
+  -numero
+  -complemento
+  -bairro
+  -cidade
+  -uf
+  -cep
+}
+class PlanoAssinatura {
+  -nome
+  -quantidadeRefeicoes
+  -periodicidade
+  -valor
+}
+class Assinatura {
+  -dataContratacao
+  -status
+  -protocolo
+  -previsaoPrimeiraEntrega
+}
+class Pedido {
+  -dataCriacao
+  -status
+}
+class ItemPedido {
+  -quantidade
+}
+class Cardapio {
+  -nome
+  -vigencia
+}
+class ItemCardapio {
+  -codigo
+  -nome
+  -descricao
+  -disponivel
+}
+class PratoPrincipal {
+  -pesoGramas
+}
+class Acompanhamento {
+  -porcao
+}
+class Sobremesa {
+  -tipo
+}
+class Pagamento {
+  -valor
+  -dataHora
+  -status
+  -codigoAutorizacao
+}
+class CartaoCredito {
+  -numeroMascarado
+  -nomeTitular
+  -validade
+}
+
+Assinante "1" -- "0..*" CodigoConfirmacao : recebe ▸
+Assinante "1" *-- "0..1" Endereco : entrega em ▸
+Assinante "1" -- "0..*" PreferenciaAlimentar : declara ▸
+Assinante "1" -- "0..*" Assinatura : contrata ▸
+Assinatura "0..*" -- "1" PlanoAssinatura : refere-se a ▸
+Assinatura "1" *-- "1" Pedido : compõe ▸
+Assinatura "1" *-- "0..*" Pagamento : registra ▸
+Pagamento "0..*" -- "1" CartaoCredito : autorizado com ▸
+Pedido "1" *-- "1..*" ItemPedido : contém ▸
+ItemPedido "0..*" -- "1" ItemCardapio : seleciona ▸
+Cardapio "1" o-- "1..*" ItemCardapio : oferece ▸
+ItemCardapio "0..*" -- "0..*" PreferenciaAlimentar : atende ▸
+ItemCardapio <|-- PratoPrincipal
+ItemCardapio <|-- Acompanhamento
+ItemCardapio <|-- Sobremesa
