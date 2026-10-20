@@ -1,0 +1,55 @@
+classDiagram
+direction LR
+class TelaAssinatura {
+  <<fronteira>>
+  -telaCelular() void
+  -telaCodigo() void
+}
+class AssinarPlanoController {
+  <<controlador>>
+  +informarCelular(celular: String) void
+  +validarCodigo(codigo: String) boolean
+  +solicitarNovoCodigo() void
+  +getTentativasRestantes() int
+}
+class Assinante {
+  -celular: String
+  -celularVerificado: boolean
+  +normalizarCelular(celular: String)$ String
+  +confirmarCelular() void
+  +isCelularVerificado() boolean
+}
+class CodigoConfirmacao {
+  +MAXIMO_TENTATIVAS: int = 3$
+  -valor: String
+  -tentativasInvalidas: int
+  -validado: boolean
+  +gerar(random: Random)$ CodigoConfirmacao
+  +validar(informado: String) boolean
+  +isBloqueado() boolean
+  +getTentativasRestantes() int
+  +gerarMensagemSMS() String
+}
+class ServicoSMS {
+  <<interface>>
+  +enviar(celular: String, mensagem: String) void
+}
+class ServicoSMSSimulado {
+  +enviar(celular: String, mensagem: String) void
+}
+class RepositorioAssinantes {
+  <<collection>>
+  +salvar(a: Assinante) void
+  +buscarPorCelular(celular: String) Optional~Assinante~
+}
+class TentativasEsgotadasException {
+  <<exception>>
+}
+TelaAssinatura --> "1" AssinarPlanoController : usa
+AssinarPlanoController --> "0..1" Assinante : sessao
+AssinarPlanoController --> "0..1" CodigoConfirmacao : sessao
+AssinarPlanoController --> "1" ServicoSMS
+AssinarPlanoController --> "1" RepositorioAssinantes
+ServicoSMSSimulado ..|> ServicoSMS
+RepositorioAssinantes o-- "0..*" Assinante
+CodigoConfirmacao ..> TentativasEsgotadasException : lanca

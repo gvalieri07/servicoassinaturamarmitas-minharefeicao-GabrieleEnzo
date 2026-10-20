@@ -1,0 +1,73 @@
+classDiagram
+direction LR
+class TelaAssinatura {
+  <<fronteira>>
+  -telaPlanos() void
+  -telaPreferencias() void
+}
+class AssinarPlanoController {
+  <<controlador>>
+  +listarPlanos() List~PlanoAssinatura~
+  +selecionarPlano(idPlano: int) void
+  +registrarPreferencias(prefs: Set~PreferenciaAlimentar~) void
+}
+class RepositorioPlanos {
+  <<collection>>
+  +listarDisponiveis() List~PlanoAssinatura~
+  +buscarPorId(id: int) Optional~PlanoAssinatura~
+}
+class PlanoAssinatura {
+  -id: int
+  -nome: String
+  -quantidadeRefeicoes: int
+  -valor: BigDecimal
+  +getPeriodicidade() Periodicidade
+  +getLimitePor(c: CategoriaItem) int
+}
+class Periodicidade {
+  <<enumeration>>
+  SEMANAL
+  QUINZENAL
+  MENSAL
+}
+class Assinante {
+  -preferencias: Set~PreferenciaAlimentar~
+  +registrarPreferencias(novas: Set~PreferenciaAlimentar~) void
+  +isCelularVerificado() boolean
+}
+class PreferenciaAlimentar {
+  <<enumeration>>
+  TRADICIONAL
+  VEGETARIANA
+  SEM_LACTOSE
+}
+class Assinatura {
+  -status: StatusAssinatura
+  -dataContratacao: LocalDate
+  +calcularValorTotal() BigDecimal
+}
+class Pedido {
+  -status: StatusPedido
+}
+class StatusAssinatura {
+  <<enumeration>>
+  EM_ELABORACAO
+  AGUARDANDO_PAGAMENTO
+  ATIVA
+  ENCERRADA_SEM_ATIVACAO
+}
+class RepositorioAssinantes {
+  <<collection>>
+  +salvar(a: Assinante) void
+}
+TelaAssinatura --> "1" AssinarPlanoController : usa
+AssinarPlanoController --> "1" RepositorioPlanos
+AssinarPlanoController --> "1" RepositorioAssinantes
+AssinarPlanoController --> "0..1" Assinatura : sessao
+AssinarPlanoController ..> Assinatura : create
+Assinatura "0..*" --> "1" PlanoAssinatura : contrata
+Assinatura "0..*" --> "1" Assinante : pertence a
+Assinatura "1" *-- "1" Pedido : compoe
+Assinatura --> StatusAssinatura
+PlanoAssinatura --> Periodicidade
+Assinante --> "0..*" PreferenciaAlimentar

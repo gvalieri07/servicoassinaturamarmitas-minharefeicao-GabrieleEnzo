@@ -1,0 +1,61 @@
+classDiagram
+direction LR
+class TelaAssinatura {
+  <<fronteira>>
+  -telaEndereco() void
+}
+class AssinarPlanoController {
+  <<controlador>>
+  +informarEndereco(endereco: Endereco) void
+  +getStatusAssinatura() StatusAssinatura
+}
+class Endereco {
+  <<value object>>
+  -logradouro: String
+  -numero: String
+  -complemento: String
+  -bairro: String
+  -cidade: String
+  -uf: String
+  -cep: String
+  +toString() String
+}
+class Assinante {
+  +definirEnderecoEntrega(e: Endereco) void
+  +getEnderecoEntrega() Endereco
+}
+class Assinatura {
+  -status: StatusAssinatura
+  -previsaoPrimeiraEntrega: LocalDate
+  +aguardarPagamento() void
+}
+class Pedido {
+  +possuiPratoPrincipal() boolean
+}
+class StatusAssinatura {
+  <<enumeration>>
+  EM_ELABORACAO
+  AGUARDANDO_PAGAMENTO
+}
+class RegraNegocioException {
+  <<exception>>
+}
+class RepositorioAssinantes {
+  <<collection>>
+  +salvar(a: Assinante) void
+}
+class RepositorioAssinaturas {
+  <<collection>>
+  +salvar(a: Assinatura) void
+}
+TelaAssinatura --> "1" AssinarPlanoController : usa
+TelaAssinatura ..> Endereco : create
+AssinarPlanoController --> "0..1" Assinante : sessao
+AssinarPlanoController --> "0..1" Assinatura : sessao
+AssinarPlanoController --> "1" RepositorioAssinantes
+AssinarPlanoController --> "1" RepositorioAssinaturas
+Assinante "1" *-- "0..1" Endereco : entrega em
+Assinatura "1" *-- "1" Pedido : compoe
+Assinatura --> StatusAssinatura
+Assinatura ..> RegraNegocioException : lanca
+RepositorioAssinaturas o-- "0..*" Assinatura

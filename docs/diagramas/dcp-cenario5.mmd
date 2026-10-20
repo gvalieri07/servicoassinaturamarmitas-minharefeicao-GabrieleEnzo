@@ -1,0 +1,89 @@
+classDiagram
+direction LR
+class TelaAssinatura {
+  <<fronteira>>
+  -telaPagamento() void
+  -telaConfirmacao(c: ConfirmacaoAssinatura) void
+}
+class AssinarPlanoController {
+  <<controlador>>
+  +obterValorTotal() BigDecimal
+  +pagar(numero: String, titular: String, validade: String, cvv: String) ConfirmacaoAssinatura
+  +desistirDaAssinatura() void
+}
+class CartaoCredito {
+  -numero: String
+  -nomeTitular: String
+  -validade: YearMonth
+  -cvv: String
+  +getNumeroMascarado() String
+}
+class OperadoraCartao {
+  <<interface>>
+  +autorizar(cartao: CartaoCredito, valor: BigDecimal) RespostaAutorizacao
+}
+class OperadoraCartaoSimulada {
+  +autorizar(cartao: CartaoCredito, valor: BigDecimal) RespostaAutorizacao
+}
+class RespostaAutorizacao {
+  <<DTO>>
+  -aprovado: boolean
+  -codigoAutorizacao: String
+  -mensagem: String
+}
+class Pagamento {
+  -valor: BigDecimal
+  -dataHora: LocalDateTime
+  -cartaoMascarado: String
+  -status: StatusPagamento
+  -codigoAutorizacao: String
+  +isAprovado() boolean
+}
+class StatusPagamento {
+  <<enumeration>>
+  APROVADO
+  RECUSADO
+}
+class Assinatura {
+  -protocolo: String
+  +calcularValorTotal() BigDecimal
+  +registrarPagamento(p: Pagamento) void
+  +atribuirProtocolo(protocolo: String) void
+  +encerrarSemAtivacao() void
+}
+class Pedido {
+  ~aprovar() void
+  ~cancelar() void
+}
+class GeradorProtocolo {
+  <<pure fabrication>>
+  +gerar() String
+}
+class ConfirmacaoAssinatura {
+  <<DTO>>
+  -protocolo: String
+  -plano: String
+  -refeicoes: List~String~
+  -enderecoEntrega: String
+  -previsaoPrimeiraEntrega: LocalDate
+  -valorTotal: BigDecimal
+  ~de(a: Assinatura)$ ConfirmacaoAssinatura
+}
+class PagamentoNaoAutorizadoException {
+  <<exception>>
+}
+TelaAssinatura --> "1" AssinarPlanoController : usa
+AssinarPlanoController --> "1" OperadoraCartao
+AssinarPlanoController --> "1" GeradorProtocolo
+AssinarPlanoController --> "0..1" Assinatura : sessao
+AssinarPlanoController ..> CartaoCredito : create
+AssinarPlanoController ..> Pagamento : create
+AssinarPlanoController ..> ConfirmacaoAssinatura : create
+AssinarPlanoController ..> PagamentoNaoAutorizadoException : lanca
+OperadoraCartaoSimulada ..|> OperadoraCartao
+OperadoraCartao ..> RespostaAutorizacao
+Pagamento ..> CartaoCredito : mascara
+Pagamento --> StatusPagamento
+Assinatura "1" *-- "0..*" Pagamento : registra
+Assinatura "1" *-- "1" Pedido : compoe
+ConfirmacaoAssinatura ..> Assinatura : le

@@ -1,0 +1,82 @@
+classDiagram
+direction LR
+class TelaAssinatura {
+  <<fronteira>>
+  -telaSelecao(c: CategoriaItem, obrigatorio: boolean) void
+  -telaResumoPedido() void
+}
+class AssinarPlanoController {
+  <<controlador>>
+  +listarItens(categoria: CategoriaItem) List~ItemCardapio~
+  +adicionarAoPedido(codigoItem: String, qtd: int) void
+  +getQuantidadeDisponivel(c: CategoriaItem) int
+  +obterPedido() Pedido
+}
+class Cardapio {
+  <<collection>>
+  +adicionarItem(item: ItemCardapio) void
+  +listarDisponiveis(c: CategoriaItem, prefs: Set~PreferenciaAlimentar~) List~ItemCardapio~
+  +buscarPorCodigo(codigo: String) Optional~ItemCardapio~
+}
+class ItemCardapio {
+  <<abstract>>
+  -codigo: String
+  -nome: String
+  -disponivel: boolean
+  +getCategoria()* CategoriaItem
+  +atende(prefs: Set~PreferenciaAlimentar~) boolean
+  +isDisponivel() boolean
+}
+class PratoPrincipal {
+  -pesoGramas: int
+  +getCategoria() CategoriaItem
+}
+class Acompanhamento {
+  +getCategoria() CategoriaItem
+}
+class Sobremesa {
+  +getCategoria() CategoriaItem
+}
+class CategoriaItem {
+  <<enumeration>>
+  PRATO_PRINCIPAL
+  ACOMPANHAMENTO
+  SOBREMESA
+}
+class Assinatura {
+  +adicionarItemAoPedido(item: ItemCardapio, qtd: int) void
+}
+class Pedido {
+  -status: StatusPedido
+  +adicionarItem(item: ItemCardapio, qtd: int) void
+  +getQuantidadeSelecionada(c: CategoriaItem) int
+  +getQuantidadeDisponivel(c: CategoriaItem) int
+  +getItens(c: CategoriaItem) List~ItemPedido~
+  +possuiPratoPrincipal() boolean
+}
+class ItemPedido {
+  -quantidade: int
+  ~acrescentar(qtd: int) void
+  +getCategoria() CategoriaItem
+}
+class PlanoAssinatura {
+  +getLimitePor(c: CategoriaItem) int
+}
+class LimiteRefeicoesExcedidoException {
+  <<exception>>
+  +getLimite() int
+  +getDisponivel() int
+}
+TelaAssinatura --> "1" AssinarPlanoController : usa
+AssinarPlanoController --> "1" Cardapio
+AssinarPlanoController --> "0..1" Assinatura : sessao
+Assinatura "1" *-- "1" Pedido : compoe
+Pedido "1" *-- "0..*" ItemPedido : contem
+ItemPedido "0..*" --> "1" ItemCardapio : refere-se a
+Cardapio "1" o-- "0..*" ItemCardapio : oferece
+Pedido "0..*" --> "1" PlanoAssinatura : limitado por
+ItemCardapio <|-- PratoPrincipal
+ItemCardapio <|-- Acompanhamento
+ItemCardapio <|-- Sobremesa
+ItemCardapio --> CategoriaItem
+Pedido ..> LimiteRefeicoesExcedidoException : lanca
