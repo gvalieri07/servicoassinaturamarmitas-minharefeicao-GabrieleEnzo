@@ -36,7 +36,12 @@ public final class Endereco {
         return valor.trim();
     }
 
+    public String getLogradouro() { return logradouro; }
+    public String getNumero() { return numero; }
+    public String getComplemento() { return complemento; }
+    public String getBairro() { return bairro; }
     public String getCidade() { return cidade; }
+    public String getUf() { return uf; }
     public String getCep() { return cep; }
 
     @Override
