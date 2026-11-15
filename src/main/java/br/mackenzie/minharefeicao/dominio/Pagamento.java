@@ -19,6 +19,21 @@ public class Pagamento {
         this.codigoAutorizacao = codigoAutorizacao;
     }
 
+    private Pagamento(BigDecimal valor, LocalDateTime dataHora, String cartaoMascarado,
+                      StatusPagamento status, String codigoAutorizacao) {
+        this.valor = valor;
+        this.dataHora = dataHora;
+        this.cartaoMascarado = cartaoMascarado;
+        this.status = status;
+        this.codigoAutorizacao = codigoAutorizacao;
+    }
+
+    /** Reconstitui um pagamento gravado em arquivo (camada de persistência). */
+    public static Pagamento restaurar(BigDecimal valor, LocalDateTime dataHora, String cartaoMascarado,
+                                      StatusPagamento status, String codigoAutorizacao) {
+        return new Pagamento(valor, dataHora, cartaoMascarado, status, codigoAutorizacao);
+    }
+
     public boolean isAprovado() { return status == StatusPagamento.APROVADO; }
     public BigDecimal getValor() { return valor; }
     public LocalDateTime getDataHora() { return dataHora; }
