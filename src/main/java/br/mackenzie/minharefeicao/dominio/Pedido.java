@@ -61,6 +61,22 @@ public class Pedido {
 
     public boolean possuiPratoPrincipal() { return getQuantidadeSelecionada(CategoriaItem.PRATO_PRINCIPAL) > 0; }
 
+    /**
+     * Reconstitui um pedido já gravado em arquivo (camada de persistência).
+     * Não revalida os limites do plano: os dados foram validados quando o
+     * pedido foi montado, no passo 12/15/18 do cenário.
+     */
+    public static Pedido restaurar(PlanoAssinatura plano, StatusPedido status) {
+        Pedido pedido = new Pedido(plano);
+        pedido.status = status;
+        return pedido;
+    }
+
+    /** Acrescenta um item lido do arquivo, sem reaplicar a regra do FA2. */
+    public void restaurarItem(ItemCardapio item, int quantidade) {
+        itens.add(new ItemPedido(item, quantidade));
+    }
+
     void aprovar() { this.status = StatusPedido.APROVADO; }
     void cancelar() { this.status = StatusPedido.CANCELADO; }
 
