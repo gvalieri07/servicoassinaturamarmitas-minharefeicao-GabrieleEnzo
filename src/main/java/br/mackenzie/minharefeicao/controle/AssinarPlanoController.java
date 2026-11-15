@@ -172,6 +172,7 @@ public class AssinarPlanoController {
             throw new PagamentoNaoAutorizadoException(resposta.getMensagem());
         }
         assinatura.atribuirProtocolo(geradorProtocolo.gerar());
+        repositorioAssinaturas.salvar(assinatura); // grava a assinatura já ativa, com protocolo
         return ConfirmacaoAssinatura.de(assinatura);
     }
 
