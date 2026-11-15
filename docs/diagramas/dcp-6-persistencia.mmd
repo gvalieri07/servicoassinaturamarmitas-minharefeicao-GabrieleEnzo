@@ -1,0 +1,84 @@
+classDiagram
+    direction LR
+
+    class MenuPrincipal {
+        <<fronteira>>
+        +executar() void
+    }
+    class TelaAssinatura {
+        <<fronteira>>
+        +executar() void
+    }
+    class TelaConsultaAssinaturas {
+        <<fronteira>>
+        +exibir() void
+    }
+    class AssinarPlanoController {
+        <<controlador>>
+        +informarCelular(String) void
+        +validarCodigo(String) boolean
+        +selecionarPlano(int) void
+        +registrarPreferencias(Set~PreferenciaAlimentar~) void
+        +adicionarAoPedido(String, int) void
+        +informarEndereco(Endereco) void
+        +pagar(String, String, String, String) ConfirmacaoAssinatura
+        +desistirDaAssinatura() void
+    }
+    class RepositorioAssinantes {
+        <<collection>>
+        -arquivo: ArquivoTexto
+        +salvar(Assinante) void
+        +buscarPorCelular(String) Optional~Assinante~
+        -carregar() void
+        -gravar() void
+    }
+    class RepositorioAssinaturas {
+        <<collection>>
+        -arquivoAssinaturas: ArquivoTexto
+        -arquivoItens: ArquivoTexto
+        -arquivoPagamentos: ArquivoTexto
+        +salvar(Assinatura) void
+        +listarTodas() List~Assinatura~
+        +listarPorCelular(String) List~Assinatura~
+        -carregar() void
+        -gravar() void
+    }
+    class ArquivoTexto {
+        <<pure fabrication>>
+        -arquivo: Path
+        +lerRegistros() List~String[]~
+        +gravarRegistros(List~String[]~) void
+        -escapar(String) String
+    }
+    class Assinante {
+        <<entidade>>
+    }
+    class Assinatura {
+        <<entidade>>
+        -codigo: String
+        +restaurar(...)$ Assinatura
+        +restaurarPagamento(Pagamento) void
+    }
+    class Pedido {
+        <<entidade>>
+        +restaurar(PlanoAssinatura, StatusPedido)$ Pedido
+        +restaurarItem(ItemCardapio, int) void
+    }
+    class Pagamento {
+        <<entidade>>
+        +restaurar(...)$ Pagamento
+    }
+
+    MenuPrincipal --> TelaAssinatura : abre
+    MenuPrincipal --> TelaConsultaAssinaturas : abre
+    TelaAssinatura --> AssinarPlanoController : operacoes de sistema
+    TelaConsultaAssinaturas --> RepositorioAssinaturas : consulta
+    AssinarPlanoController --> RepositorioAssinantes
+    AssinarPlanoController --> RepositorioAssinaturas
+    RepositorioAssinantes --> ArquivoTexto : assinantes.txt
+    RepositorioAssinaturas --> ArquivoTexto : assinaturas.txt / itens_pedido.txt / pagamentos.txt
+    RepositorioAssinantes o-- Assinante
+    RepositorioAssinaturas o-- Assinatura
+    Assinatura *-- Pedido
+    Assinatura *-- Pagamento
+    Assinatura --> Assinante
