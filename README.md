@@ -44,7 +44,7 @@ Este documento apresenta a estruturação das entregas avaliativas do projeto.
 - **Descrição:** tradução dos modelos de projeto para código Java, mantendo a correspondência entre os diagramas de sequência e a implementação. Estão implementados os objetos **fronteira** (telas de console), **controle** (controlador do caso de uso) e **entidade/domínio**, com **persistência em arquivos de texto**.
 - **Wiki da entrega:** [Implementação do Cenário do Caso de Uso](../../wiki/N2%E2%80%90Entrega%E2%80%904%E2%80%90Implementacao%E2%80%90do%E2%80%90Cenario)
 - **Código-fonte:** [`src/`](src) · **Evidências de execução:** [na Wiki da entrega](../../wiki/N2%E2%80%90Entrega%E2%80%904%E2%80%90Implementacao%E2%80%90do%E2%80%90Cenario#6-evidências-de-execução)
-- **Vídeo da Entrega 4:** _(link a ser incluído)_
+- **Vídeo da Entrega 4:** https://youtu.be/U07aJ_anCTo
 
 ---
 
